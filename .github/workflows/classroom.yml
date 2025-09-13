@@ -1,0 +1,75 @@
+name: Autograding Tests
+'on':
+  - push
+  - repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+      - name: testCalculatePaths
+        id: testcalculatepaths
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: testCalculatePaths
+          setup-command: ''
+          command: mvn test -Dtest=ApplicationTest#testCalculatePaths
+          timeout: 10
+          max-score: 4
+      - name: testCalculateDistances
+        id: testcalculatedistances
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: testCalculateDistances
+          setup-command: ''
+          command: mvn test -Dtest=ApplicationTest#testCalculateDistances
+          timeout: 10
+          max-score: 8
+      - name: testReadAndPrintFirstArgument
+        id: testreadandprintfirstargument
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: testReadAndPrintFirstArgument
+          setup-command: ''
+          command: mvn test -Dtest=ApplicationTest#testReadAndPrintFirstArgument
+          timeout: 10
+          max-score: 2
+      - name: testPrintEdgesWhenNoArgs
+        id: testprintedgeswhennoargs
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: testPrintEdgesWhenNoArgs
+          setup-command: ''
+          command: " mvn test -Dtest=ApplicationTest#testPrintEdgesWhenNoArgs"
+          timeout: 10
+          max-score: 16
+      - name: testEntryPointClassName
+        id: testentrypointclassname
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: testEntryPointClassName
+          setup-command: ''
+          command: mvn test -Dtest=ApplicationTest#testEntryPointClassName
+          timeout: 10
+          max-score: 1
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          TESTCALCULATEPATHS_RESULTS: "${{steps.testcalculatepaths.outputs.result}}"
+          TESTCALCULATEDISTANCES_RESULTS: "${{steps.testcalculatedistances.outputs.result}}"
+          TESTREADANDPRINTFIRSTARGUMENT_RESULTS: "${{steps.testReadAndPrintFirstArgument.outputs.result}}"
+          TESTPRINTEDGESWHENNOARGS_RESULTS: "${{steps.testprintedgeswhennoargs.outputs.result}}"
+          TESTENTRYPOINTCLASSNAME_RESULTS: "${{steps.testentrypointclassname.outputs.result}}"
+        with:
+          runners: testcalculatepaths,testcalculatedistances,testReadAndPrintFirstArgument,testprintedgeswhennoargs,testentrypointclassname
